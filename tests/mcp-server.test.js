@@ -3,13 +3,20 @@ import { spawn } from 'child_process';
 
 describe('mcp-server', () => {
   let serverProcess;
+  let ready = false;
   beforeAll((done) => {
     serverProcess = spawn('node', ['mcp-server.js']);
+    const onReady = () => {
+      if (!ready) {
+        ready = true;
+        done();
+      }
+    };
     serverProcess.stderr.on('data', (data) => {
-      if (data.toString().includes('Turtle connected')) done();
+      if (data.toString().includes('Turtle connected')) onReady();
     });
-    setTimeout(done, 1000); // fallback if event doesn't fire
-  });
+    setTimeout(onReady, 1500);
+  }, 6000);
   afterAll(() => {
     if (serverProcess) serverProcess.kill();
   });
